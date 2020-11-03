@@ -29,8 +29,11 @@ myRed <- "#e41a1c" # RRGGBB
 munsell::plot_hex("#FF00FF")
 
 # access color brewer
-display.brewer.pal(3, "Set2")
+display.brewer.pal(4, "Set1")
+# brewer.pal(4, "Set1")[2:4]
 myCol <- brewer.pal(3, "Set2") # give the hex codes
+myCol
+
 
 # Coding challenges ----
 # Layer 1: Data
@@ -45,8 +48,8 @@ p <- ggplot(iris, aes(Sepal.Length, Sepal.Width, color = Species))
 # Create basic scatter plot
 p +
   geom_point()
-# This it mostly perfectly fine, but it doesn't 
-# guarantee there will be no overplotting, 
+# This it mostly perfectly fine, but it doesn't
+# guarantee there will be no overplotting,
 # so always consider if it's the right choice.
 
 # Causes for over-plotting:
@@ -72,13 +75,13 @@ p +
 posn_j <- position_jitter(seed = 136)
 
 p +
-  geom_point(position = posn_j, 
-             shape = 16, 
+  geom_point(position = posn_j,
+             shape = 16,
              alpha = 0.65)
 
 library(car)
 str(Vocab)
-g <- ggplot(Vocab, aes(education, vocabulary)) 
+g <- ggplot(Vocab, aes(education, vocabulary))
 g
 
 # Default
@@ -96,9 +99,79 @@ g +
   stat_sum()
 
 
+# Modifying the plot ----
+# 3 - Add linear models, without background
+# 4 - Change the colors - use Dark2 from color brewer
+# or use the myCol vector from above
+# Recall: aesthetics == scales == axes
 
-# To continue:
+# map a group onto a specific color:
+# use a named vector
+myCol_named <- c(virginica = "#377EB8",   # blue
+                 setosa = "#4DAF4A",      # green
+                 versicolor = "#984EA3")  # purple
+munsell::plot_hex(myCol_named)
+
+
+# 5 - Remove non-data ink
+# 6 - Re-position the legend to the upper left corner
+# legend position is in units of npc
+
+# 7 - Relabel the axes (names and units), add a title or caption
+# Title: "The Iris Dataset, again!"
+# Caption: "Anderson, 1931"
+
+# 8 - Change the aspect ratio to 1:1
+# 9 - Set limits on the x and y axes
+
 p +
-  geom_jitter(shape = 16, alpha = 0.65)
+  geom_jitter(shape = 16, alpha = 0.65) +
+  geom_smooth(method = "lm", se = FALSE) +
+  coord_fixed(1,
+              xlim = c(4,8),
+              ylim = c(2, 5),
+              expand = 0) +
+  scale_color_manual(values = myCol_named) +
+  labs(title = "The Iris Dataset, again!",
+       caption = "Anderson, 1931",
+       color = "Iris species",
+       x = "Sepal Length (cm)",
+       y = "Sepal Width (cm)") +
+  theme_classic(base_size = 8) +
+  theme(axis.text = element_text(color = "black"),
+        legend.position = c(0.1, 0.9)) +
+  NULL
+
+# Saving the plot:
+# Raster: png, jpg, gif, bmp, tif
+# pixels and resolution
+ggsave("myPlot.png", width = 6, height = 6, units = "cm")
 
 
+# Vector: svg, pdf, ps, eps, il
+# instructions to draw an image
+ggsave("myPlot.pdf", width = 6, height = 6, units = "cm")
+
+
+# Some extra examples ----
+
+# specify a color vector:
+p +
+  geom_jitter(shape = 16, alpha = 0.65) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_manual(values = myCol) +
+  NULL
+
+# specify brewer color:
+p +
+  geom_jitter(shape = 16, alpha = 0.65) +
+  geom_smooth(method = "lm", se = FALSE) +
+  scale_color_brewer(palette = "Dark2") +
+  NULL
+
+
+# Setting span with LOESS
+p +
+  geom_jitter(shape = 16, alpha = 0.65) +
+  geom_smooth(span = 0.45, se = FALSE) +
+  NULL
